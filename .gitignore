@@ -4,6 +4,10 @@ dist/
 out/
 cache/
 broadcast/
+contracts/lib/
+contracts/out/
+contracts/cache/
+contracts/broadcast/
 
 # env & secrets — never commit keys
 .env
