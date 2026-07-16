@@ -14,9 +14,15 @@ Wallet-drainer phishing is the #1 documented money-loss in crypto — the chain 
 
 ## Status
 
-Day 0 — spec and scaffold. See [SPEC.md](./SPEC.md).
+Contracts live & verified on **Monad testnet** (chain id `10143`). Frontend in progress. See [SPEC.md](./SPEC.md).
 
-Built for Monad Spark on **Monad testnet** (chain id `10143`).
+| Contract | Address |
+|---|---|
+| DeadboltFactory | [`0x1B896cb2D43F812feEa43aCEBA1D05f2Ed8bbE78`](https://testnet.monadexplorer.com/address/0x1B896cb2D43F812feEa43aCEBA1D05f2Ed8bbE78) |
+| Demo token (dUSD) | [`0x2DE0D591b708e5f1f1F7878d912e3EAB971F224C`](https://testnet.monadexplorer.com/address/0x2DE0D591b708e5f1f1F7878d912e3EAB971F224C) |
+| Drainer (demo) | [`0xDd4C500bf704D58cd9E1631fe70C92392FfB89d1`](https://testnet.monadexplorer.com/address/0xDd4C500bf704D58cd9E1631fe70C92392FfB89d1) |
+
+Built for Monad Spark.
 
 ## Stack
 

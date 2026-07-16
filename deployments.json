@@ -1,0 +1,15 @@
+{
+  "monadTestnet": {
+    "chainId": 10143,
+    "rpc": "https://testnet-rpc.monad.xyz",
+    "explorer": "https://testnet.monadexplorer.com",
+    "deployedAt": "2026-07-15",
+    "contracts": {
+      "DeadboltFactory": "0x1B896cb2D43F812feEa43aCEBA1D05f2Ed8bbE78",
+      "MockERC20_dUSD": "0x2DE0D591b708e5f1f1F7878d912e3EAB971F224C",
+      "Drainer_demo": "0xDd4C500bf704D58cd9E1631fe70C92392FfB89d1"
+    },
+    "verified": true,
+    "verifier": "sourcify (https://sourcify-api-monad.blockvision.org)"
+  }
+}
