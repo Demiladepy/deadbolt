@@ -5,18 +5,16 @@ export function Hero() {
     <section className="hero">
       <div className="eyebrow">
         <span className="dot" />
-        Onchain approval firewall · Monad testnet
+        Onchain approval firewall · Monad
       </div>
       <h1 className="hero-title">
         Sign anything,
         <br />
-        <span className="serif">lose nothing.</span>
+        <span className="amp">lose nothing.</span>
       </h1>
       <p className="hero-sub">
-        Wallet-drainer phishing is the #1 money-loss in crypto — the chain works
-        fine, people just sign things they don't understand. Deadbolt puts a
-        policy between your tokens and every approval, and wipes every risky one
-        in a single signature.
+        Deadbolt puts a policy between your tokens and every approval. Phished
+        signatures land in quarantine. Panic closes every door in one tx.
       </p>
       <div className="hero-cta">
         <ConnectButton label="Connect wallet" />
@@ -30,21 +28,21 @@ export function Hero() {
         </a>
       </div>
 
-      <div className="rail">
-        <div className="rail-label">What the guard enforces</div>
-        <div className="chips">
-          <span className="chip">
-            Allowlist <span>instant</span>
-          </span>
-          <span className="chip">
-            Timelock <span>quarantine</span>
-          </span>
-          <span className="chip">
-            Panic <span>revoke-all</span>
-          </span>
-          <span className="chip">
-            Onchain <span>unspoofable</span>
-          </span>
+      <div className="flow-rail" aria-label="How Deadbolt works">
+        <div className="flow-item">
+          <div className="n">01</div>
+          <h3>Allowlist</h3>
+          <p>Trusted spenders execute instantly.</p>
+        </div>
+        <div className="flow-item">
+          <div className="n">02</div>
+          <h3>Timelock</h3>
+          <p>Unknown approvals sit in cancelable quarantine.</p>
+        </div>
+        <div className="flow-item">
+          <div className="n">03</div>
+          <h3>Panic</h3>
+          <p>One signature revokes every live approval.</p>
         </div>
       </div>
     </section>

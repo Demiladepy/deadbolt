@@ -29,56 +29,58 @@ export default function App() {
 
   return (
     <>
-      <div className="starburst" />
       <div className="shell">
-      <nav className="nav">
-        <div className="brand">
-          <LockMark />
-          Deadbolt
-        </div>
-        <div className="nav-links">
-          <a href="https://github.com/Demiladepy/deadbolt" target="_blank" rel="noreferrer">
-            GitHub
-          </a>
-        </div>
-        <ConnectButton showBalance={false} accountStatus="address" chainStatus="icon" />
-      </nav>
-
-      <Hero />
-
-      {isConnected && address && (
-        <>
-          <div className="tabs">
-            <button
-              className={`tab ${tab === "vault" ? "active" : ""}`}
-              onClick={() => setTab("vault")}
-            >
-              Guard vault
-            </button>
-            <button
-              className={`tab ${tab === "scanner" ? "active" : ""}`}
-              onClick={() => setTab("scanner")}
-            >
-              Approval scanner
-            </button>
+        <nav className="nav">
+          <div className="brand">
+            <LockMark />
+            Deadbolt
           </div>
+          <div className="nav-links">
+            <a href="https://github.com/Demiladepy/deadbolt" target="_blank" rel="noreferrer">
+              GitHub
+            </a>
+            <a href="https://faucet.monad.xyz" target="_blank" rel="noreferrer">
+              Faucet
+            </a>
+          </div>
+          <ConnectButton showBalance={false} accountStatus="address" chainStatus="icon" />
+        </nav>
 
-          {tab === "vault" ? (
-            vault ? (
-              <VaultDashboard vault={vault} user={address} />
+        <Hero />
+
+        {isConnected && address && (
+          <>
+            <div className="tabs">
+              <button
+                className={`tab ${tab === "vault" ? "active" : ""}`}
+                onClick={() => setTab("vault")}
+              >
+                Guard vault
+              </button>
+              <button
+                className={`tab ${tab === "scanner" ? "active" : ""}`}
+                onClick={() => setTab("scanner")}
+              >
+                Approval scanner
+              </button>
+            </div>
+
+            {tab === "vault" ? (
+              vault ? (
+                <VaultDashboard vault={vault} user={address} />
+              ) : (
+                <CreateVault onCreated={() => refetch()} />
+              )
             ) : (
-              <CreateVault onCreated={() => refetch()} />
-            )
-          ) : (
-            <ApprovalScanner user={address} />
-          )}
-        </>
-      )}
+              <ApprovalScanner user={address} />
+            )}
+          </>
+        )}
 
-      <footer className="foot">
-        <span>Deadbolt · onchain approval firewall · Monad testnet (10143)</span>
-        <span>Sign anything, lose nothing.</span>
-      </footer>
+        <footer className="foot">
+          <span>Deadbolt · Monad testnet · chain 10143</span>
+          <span>Sign anything, lose nothing.</span>
+        </footer>
       </div>
       <AudioToggle />
     </>

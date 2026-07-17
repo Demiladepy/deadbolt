@@ -28,7 +28,7 @@ export function CreateVault({ onCreated }: { onCreated: () => void }) {
               <button
                 key={p.value}
                 type="button"
-                className={`btn btn-sm ${delay === p.value ? "btn-violet" : "btn-ghost"}`}
+                className={`btn btn-sm ${delay === p.value ? "btn-primary" : "btn-ghost"}`}
                 onClick={() => setDelay(p.value)}
               >
                 {p.label}
@@ -37,7 +37,7 @@ export function CreateVault({ onCreated }: { onCreated: () => void }) {
           </div>
         </div>
         <button
-          className="btn btn-violet"
+          className="btn btn-primary"
           disabled={tx.busy}
           onClick={() =>
             tx.run({

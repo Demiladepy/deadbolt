@@ -5,7 +5,7 @@ import { vaultAbi, erc20Abi, DEMO_TOKEN_ADDRESS, DRAINER_ADDRESS } from "../conf
 import { explorerAddress } from "../config/chain";
 import { useTx } from "../hooks/useTx";
 import { TxToast } from "./TxToast";
-import { AttackSim } from "./AttackSim";
+import { DemoPath } from "./DemoPath";
 import { fmtToken, shorten, untilEta } from "../lib/format";
 
 type PendingApproval = {
@@ -119,9 +119,10 @@ export function VaultDashboard({ vault, user }: { vault: Address; user: Address 
   return (
     <div className="dash">
       <div className="section-head">
-        <h2>
-          Your <span className="serif">Deadbolt</span> vault
-        </h2>
+        <div>
+          <div className="section-kicker">Your vault</div>
+          <h2>Deadbolt</h2>
+        </div>
         <a className="link mono" href={explorerAddress(vault)} target="_blank" rel="noreferrer">
           {shorten(vault, 6)} ↗
         </a>
@@ -133,20 +134,53 @@ export function VaultDashboard({ vault, user }: { vault: Address; user: Address 
         </div>
       )}
 
+      <DemoPath
+        vault={vault}
+        user={user}
+        decimals={decimals}
+        symbol={symbol}
+        vaultBal={vaultBal}
+        userBal={userBal}
+        userAllowance={userAllowance}
+        locked={locked}
+        busy={tx.busy}
+        onMint={mint}
+        onDeposit={deposit}
+        onPanic={() =>
+          tx.run({
+            address: vault,
+            abi: vaultAbi,
+            functionName: "panic",
+            args: [],
+            label: "PANIC — revoke everything",
+          })
+        }
+        onUnlock={() =>
+          tx.run({
+            address: vault,
+            abi: vaultAbi,
+            functionName: "unlock",
+            args: [],
+            label: "Unlock vault",
+          })
+        }
+        onChange={() => refetch()}
+      />
+
       <div className="stat-row">
         <div className="stat">
-          <div className="k">Protected balance</div>
+          <div className="k">Protected</div>
           <div className="v safe">
             {fmtToken(vaultBal, decimals)} <span className="unit">{symbol}</span>
           </div>
         </div>
         <div className="stat">
           <div className="k">Live approvals</div>
-          <div className="v violet">{liveApprovals.length}</div>
+          <div className="v">{liveApprovals.length}</div>
         </div>
         <div className="stat">
           <div className="k">Quarantined</div>
-          <div className="v">{activeQueue.length}</div>
+          <div className="v warn">{activeQueue.length}</div>
         </div>
         <div className="stat">
           <div className="k">Timelock</div>
@@ -154,8 +188,9 @@ export function VaultDashboard({ vault, user }: { vault: Address; user: Address 
         </div>
       </div>
 
+      <div className="manage-label">Manage policy</div>
+
       <div className="grid">
-        {/* left: policy */}
         <div className="card pad-lg">
           <div className="card-title">Request an approval</div>
           <div className="field">
@@ -188,27 +223,28 @@ export function VaultDashboard({ vault, user }: { vault: Address; user: Address 
             Trust this spender (allowlist — approvals execute instantly)
           </label>
           <button
-            className="btn btn-violet full"
+            className="btn btn-primary full"
             disabled={!validSpender || locked || tx.busy}
             onClick={requestApproval}
           >
             {trust ? "Add to allowlist" : "Request approval →"}
           </button>
           <p className="hint">
-            Untrusted spenders are quarantined behind the timelock — a phished
-            signature lands in the queue below, not in the attacker's wallet.
+            Untrusted spenders are quarantined — a phished signature lands in the
+            queue below, not in the attacker&apos;s wallet.
           </p>
         </div>
 
-        {/* right: fund */}
         <div className="card pad-lg">
-          <div className="card-title">Fund the vault</div>
+          <div className="card-title">Fund again</div>
           <div className="stat" style={{ marginBottom: 16 }}>
-            <div className="k">Your wallet ({symbol})</div>
-            <div className="v">{fmtToken(userBal, decimals)}</div>
+            <div className="k">Wallet balance</div>
+            <div className="v">
+              {fmtToken(userBal, decimals)} <span className="unit">{symbol}</span>
+            </div>
           </div>
           <button className="btn btn-ghost full" onClick={mint} disabled={tx.busy} style={{ marginBottom: 10 }}>
-            Mint 1,000 {symbol} (testnet)
+            Mint 1,000 {symbol}
           </button>
           <button
             className="btn btn-primary full"
@@ -219,29 +255,19 @@ export function VaultDashboard({ vault, user }: { vault: Address; user: Address 
           </button>
           <hr className="hr" />
           <p className="hint">
-            Tokens live in the vault, so the vault owns every approval — which is why
-            one <b style={{ color: "var(--danger)" }}>panic</b> can revoke them all.
+            Tokens live in the vault, so one <b style={{ color: "var(--danger)" }}>panic</b>{" "}
+            can revoke every approval it has granted.
           </p>
         </div>
       </div>
 
-      {/* live attack demo */}
-      <AttackSim
-        vault={vault}
-        user={user}
-        decimals={decimals}
-        symbol={symbol}
-        onChange={() => refetch()}
-      />
-
-      {/* quarantine queue */}
       <div className="card">
         <div className="card-title">
           <span>Quarantine queue</span>
-          <span className="count">{activeQueue.length} pending</span>
+          <span className="count">{activeQueue.length}</span>
         </div>
         {activeQueue.length === 0 ? (
-          <div className="empty">Nothing quarantined. Untrusted approvals would appear here.</div>
+          <div className="empty">Nothing quarantined. Untrusted approvals appear here.</div>
         ) : (
           <div className="list">
             {activeQueue.map((p) => {
@@ -298,10 +324,9 @@ export function VaultDashboard({ vault, user }: { vault: Address; user: Address 
         )}
       </div>
 
-      {/* live approvals */}
       <div className="card">
         <div className="card-title">
-          <span>Open doors (live approvals)</span>
+          <span>Open doors</span>
           <span className="count">{liveApprovals.length}</span>
         </div>
         {liveApprovals.length === 0 ? (
@@ -338,7 +363,6 @@ export function VaultDashboard({ vault, user }: { vault: Address; user: Address 
         )}
       </div>
 
-      {/* panic */}
       <div className="panic">
         <div>
           <h3>The deadbolt</h3>
@@ -359,7 +383,13 @@ export function VaultDashboard({ vault, user }: { vault: Address; user: Address 
             className="btn btn-danger"
             disabled={tx.busy}
             onClick={() =>
-              tx.run({ address: vault, abi: vaultAbi, functionName: "panic", args: [], label: "PANIC — revoke everything" })
+              tx.run({
+                address: vault,
+                abi: vaultAbi,
+                functionName: "panic",
+                args: [],
+                label: "PANIC — revoke everything",
+              })
             }
             style={{ fontSize: 15, padding: "13px 26px" }}
           >
