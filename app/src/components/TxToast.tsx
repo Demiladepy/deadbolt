@@ -7,21 +7,33 @@ type Props = {
   error?: string;
 };
 
+const dot = (color: string) => (
+  <span
+    style={{
+      width: 8,
+      height: 8,
+      borderRadius: "50%",
+      background: color,
+      flex: "none",
+    }}
+  />
+);
+
 export function TxToast({ status, hash, label, error }: Props) {
   if (status === "idle") return null;
 
   return (
     <div className="toast">
       {status === "pending" && <span className="spin" />}
-      {status === "mined" && <span>✅</span>}
-      {status === "error" && <span>⚠️</span>}
+      {status === "mined" && dot("var(--safe)")}
+      {status === "error" && dot("var(--danger)")}
       <span>
         {status === "pending" && `${label ?? "Working"}…`}
         {status === "mined" && `${label ?? "Done"} — confirmed`}
         {status === "error" && (error ?? "Transaction failed")}
       </span>
       {hash && (
-        <a className="link" href={explorerTx(hash)} target="_blank" rel="noreferrer">
+        <a href={explorerTx(hash)} target="_blank" rel="noreferrer">
           view ↗
         </a>
       )}

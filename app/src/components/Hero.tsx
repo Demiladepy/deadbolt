@@ -34,19 +34,16 @@ export function Hero() {
         <div className="rail-label">What the guard enforces</div>
         <div className="chips">
           <span className="chip">
-            Allowlist <sup>INSTANT</sup>
+            Allowlist <span>instant</span>
           </span>
           <span className="chip">
-            Timelock <sup>QUARANTINE</sup>
+            Timelock <span>quarantine</span>
           </span>
           <span className="chip">
-            Panic <sup>REVOKE-ALL</sup>
+            Panic <span>revoke-all</span>
           </span>
           <span className="chip">
-            Onchain <sup>UNSPOOFABLE</sup>
-          </span>
-          <span className="chip">
-            One signature <sup>MONAD</sup>
+            Onchain <span>unspoofable</span>
           </span>
         </div>
       </div>

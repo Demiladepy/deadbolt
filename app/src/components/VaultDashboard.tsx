@@ -5,6 +5,7 @@ import { vaultAbi, erc20Abi, DEMO_TOKEN_ADDRESS, DRAINER_ADDRESS } from "../conf
 import { explorerAddress } from "../config/chain";
 import { useTx } from "../hooks/useTx";
 import { TxToast } from "./TxToast";
+import { AttackSim } from "./AttackSim";
 import { fmtToken, shorten, untilEta } from "../lib/format";
 
 type PendingApproval = {
@@ -60,14 +61,12 @@ export function VaultDashboard({ vault, user }: { vault: Address; user: Address 
     [queue]
   );
 
-  // --- fund flow ---
-  const MINT = parseUnits("1000", decimals);
   async function mint() {
     await tx.run({
       address: token,
       abi: erc20Abi,
       functionName: "mint",
-      args: [user, MINT],
+      args: [user, parseUnits("1000", decimals)],
       label: `Mint 1,000 ${symbol}`,
     });
   }
@@ -91,7 +90,6 @@ export function VaultDashboard({ vault, user }: { vault: Address; user: Address 
     });
   }
 
-  // --- policy form ---
   const [spender, setSpender] = useState("");
   const [amount, setAmount] = useState("100");
   const [trust, setTrust] = useState(false);
@@ -118,14 +116,9 @@ export function VaultDashboard({ vault, user }: { vault: Address; user: Address 
     });
   }
 
-  function useDrainer() {
-    setSpender(DRAINER_ADDRESS);
-    setTrust(false);
-  }
-
   return (
     <div className="dash">
-      <div className="dash-head">
+      <div className="section-head">
         <h2>
           Your <span className="serif">Deadbolt</span> vault
         </h2>
@@ -136,15 +129,15 @@ export function VaultDashboard({ vault, user }: { vault: Address; user: Address 
 
       {locked && (
         <div className="locked-banner">
-          🔒 Vault is locked after a panic. No new approvals until you unlock.
+          Vault locked after a panic — no new approvals until you unlock.
         </div>
       )}
 
       <div className="stat-row">
         <div className="stat">
           <div className="k">Protected balance</div>
-          <div className="v mint">
-            {fmtToken(vaultBal, decimals)} <span style={{ fontSize: 13 }}>{symbol}</span>
+          <div className="v safe">
+            {fmtToken(vaultBal, decimals)} <span className="unit">{symbol}</span>
           </div>
         </div>
         <div className="stat">
@@ -174,34 +167,34 @@ export function VaultDashboard({ vault, user }: { vault: Address; user: Address 
                 value={spender}
                 onChange={(e) => setSpender(e.target.value.trim())}
               />
-              <button className="btn btn-ghost btn-sm" onClick={useDrainer} type="button">
-                Use demo drainer
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={() => {
+                  setSpender(DRAINER_ADDRESS);
+                  setTrust(false);
+                }}
+                type="button"
+              >
+                Demo drainer
               </button>
             </div>
           </div>
           <div className="field">
             <label>Amount ({symbol})</label>
-            <input
-              className="input"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-            />
+            <input className="input" value={amount} onChange={(e) => setAmount(e.target.value)} />
           </div>
-          <label
-            style={{ display: "flex", gap: 9, alignItems: "center", fontSize: 13.5, color: "var(--muted)", marginBottom: 16, cursor: "pointer" }}
-          >
+          <label className="check">
             <input type="checkbox" checked={trust} onChange={(e) => setTrust(e.target.checked)} />
             Trust this spender (allowlist — approvals execute instantly)
           </label>
           <button
-            className="btn btn-violet"
+            className="btn btn-violet full"
             disabled={!validSpender || locked || tx.busy}
             onClick={requestApproval}
-            style={{ width: "100%", justifyContent: "center" }}
           >
             {trust ? "Add to allowlist" : "Request approval →"}
           </button>
-          <p style={{ fontSize: 12.5, color: "var(--faint)", marginTop: 12, lineHeight: 1.5 }}>
+          <p className="hint">
             Untrusted spenders are quarantined behind the timelock — a phished
             signature lands in the queue below, not in the attacker's wallet.
           </p>
@@ -214,48 +207,48 @@ export function VaultDashboard({ vault, user }: { vault: Address; user: Address 
             <div className="k">Your wallet ({symbol})</div>
             <div className="v">{fmtToken(userBal, decimals)}</div>
           </div>
-          <button
-            className="btn btn-ghost"
-            onClick={mint}
-            disabled={tx.busy}
-            style={{ width: "100%", justifyContent: "center", marginBottom: 10 }}
-          >
-            Mint 1,000 {symbol} (testnet faucet)
+          <button className="btn btn-ghost full" onClick={mint} disabled={tx.busy} style={{ marginBottom: 10 }}>
+            Mint 1,000 {symbol} (testnet)
           </button>
           <button
-            className="btn btn-primary"
+            className="btn btn-primary full"
             onClick={deposit}
             disabled={tx.busy || userBal === 0n}
-            style={{ width: "100%", justifyContent: "center" }}
           >
-            {userAllowance < userBal && userBal > 0n
-              ? "Approve deposit"
-              : `Deposit all into vault`}
+            {userAllowance < userBal && userBal > 0n ? "Approve deposit" : "Deposit all into vault"}
           </button>
           <hr className="hr" />
-          <p style={{ fontSize: 12.5, color: "var(--faint)", lineHeight: 1.5 }}>
-            Tokens live in the vault, so the vault owns every approval — which is
-            why one <span style={{ color: "var(--danger)" }}>panic</span> can
-            revoke them all.
+          <p className="hint">
+            Tokens live in the vault, so the vault owns every approval — which is why
+            one <b style={{ color: "var(--danger)" }}>panic</b> can revoke them all.
           </p>
         </div>
       </div>
+
+      {/* live attack demo */}
+      <AttackSim
+        vault={vault}
+        user={user}
+        decimals={decimals}
+        symbol={symbol}
+        onChange={() => refetch()}
+      />
 
       {/* quarantine queue */}
       <div className="card">
         <div className="card-title">
           <span>Quarantine queue</span>
-          <span style={{ textTransform: "none", letterSpacing: 0 }}>{activeQueue.length} pending</span>
+          <span className="count">{activeQueue.length} pending</span>
         </div>
         {activeQueue.length === 0 ? (
           <div className="empty">Nothing quarantined. Untrusted approvals would appear here.</div>
         ) : (
-          <div className="pending">
+          <div className="list">
             {activeQueue.map((p) => {
               const eta = Number(p.eta);
               const ready = now >= eta;
               return (
-                <div className="pending-item" key={p.id}>
+                <div className="item" key={p.id}>
                   <div>
                     <div className="who">{shorten(p.spender, 6)}</div>
                     <div className="meta">
@@ -263,7 +256,7 @@ export function VaultDashboard({ vault, user }: { vault: Address; user: Address 
                       {ready ? "timelock elapsed" : `unlocks in ${untilEta(eta, now)}`}
                     </div>
                   </div>
-                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  <div className="item-actions">
                     <span className={`badge ${ready ? "ready" : "wait"}`}>
                       {ready ? "ready" : "waiting"}
                     </span>
@@ -309,20 +302,20 @@ export function VaultDashboard({ vault, user }: { vault: Address; user: Address 
       <div className="card">
         <div className="card-title">
           <span>Open doors (live approvals)</span>
-          <span style={{ textTransform: "none", letterSpacing: 0 }}>{liveApprovals.length}</span>
+          <span className="count">{liveApprovals.length}</span>
         </div>
         {liveApprovals.length === 0 ? (
           <div className="empty">No live approvals. Every door is shut.</div>
         ) : (
-          <div className="pending">
+          <div className="list">
             {liveApprovals.map((a, i) => (
-              <div className="pending-item" key={i}>
+              <div className="item" key={i}>
                 <div>
                   <div className="who">{shorten(a.spender, 6)}</div>
                   <div className="meta">on token {shorten(a.token, 6)}</div>
                 </div>
-                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                  <span className="badge trusted">approved</span>
+                <div className="item-actions">
+                  <span className="badge on">approved</span>
                   <button
                     className="btn btn-ghost btn-sm"
                     disabled={tx.busy}
@@ -346,11 +339,11 @@ export function VaultDashboard({ vault, user }: { vault: Address; user: Address 
       </div>
 
       {/* panic */}
-      <div className="panic-zone">
-        <h3>The deadbolt</h3>
-        <p>
-          One signature revokes every live approval and locks the vault. Sub-second on Monad.
-        </p>
+      <div className="panic">
+        <div>
+          <h3>The deadbolt</h3>
+          <p>One signature revokes every live approval and locks the vault. Sub-second on Monad.</p>
+        </div>
         {locked ? (
           <button
             className="btn btn-ghost"
@@ -368,9 +361,9 @@ export function VaultDashboard({ vault, user }: { vault: Address; user: Address 
             onClick={() =>
               tx.run({ address: vault, abi: vaultAbi, functionName: "panic", args: [], label: "PANIC — revoke everything" })
             }
-            style={{ fontSize: 16, padding: "14px 32px" }}
+            style={{ fontSize: 15, padding: "13px 26px" }}
           >
-            🚨 PANIC — slam every door
+            Panic — slam every door
           </button>
         )}
       </div>
