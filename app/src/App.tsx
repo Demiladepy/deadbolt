@@ -8,6 +8,7 @@ import { VaultDashboard } from "./components/VaultDashboard";
 import { CreateVault } from "./components/CreateVault";
 import { ApprovalScanner } from "./components/ApprovalScanner";
 import { LockMark } from "./components/LockMark";
+import { AudioToggle } from "./components/AudioToggle";
 
 type Tab = "vault" | "scanner";
 
@@ -27,7 +28,9 @@ export default function App() {
   const vault = vaultList.length ? vaultList[vaultList.length - 1] : undefined;
 
   return (
-    <div className="shell">
+    <>
+      <div className="starburst" />
+      <div className="shell">
       <nav className="nav">
         <div className="brand">
           <LockMark />
@@ -76,6 +79,8 @@ export default function App() {
         <span>Deadbolt · onchain approval firewall · Monad testnet (10143)</span>
         <span>Sign anything, lose nothing.</span>
       </footer>
-    </div>
+      </div>
+      <AudioToggle />
+    </>
   );
 }
