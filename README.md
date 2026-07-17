@@ -10,11 +10,26 @@ Wallet-drainer phishing is the #1 documented money-loss in crypto — the chain 
 
 - **Guard vault** — your tokens live behind a policy: approvals to trusted spenders go through instantly, approvals to unknown spenders are quarantined in a cancelable timelock.
 - **Panic** — one signature revokes every outstanding approval and locks the vault. Sub-second on Monad.
-- **Scanner** — see and revoke every live ERC-20/721 approval on your EOA.
+- **Live attack sim** — sign a drainer's malicious approval on-screen and watch it get quarantined; the drain reverts and your funds never move.
+- **Scanner** — see and revoke every live ERC-20 approval on your own wallet, one at a time or all in a single signature on EIP-5792 wallets.
+
+## Run the app
+
+```bash
+cd app
+npm install
+npm run dev
+```
+
+Connect a wallet on Monad testnet (chain `10143`), mint the demo token, deposit it, and try the flows. Get testnet MON from https://faucet.monad.xyz.
+
+## Deploy
+
+The app auto-deploys to GitHub Pages via [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) on every push to `main`. Enable it once under **Settings → Pages → Source: GitHub Actions**; it then serves at `https://demiladepy.github.io/deadbolt/`. Contracts deploy + verify with Foundry — see [contracts/README.md](contracts/README.md).
 
 ## Status
 
-Contracts live & verified on **Monad testnet** (chain id `10143`). Frontend in progress. See [SPEC.md](./SPEC.md).
+Contracts live & verified on **Monad testnet** (chain id `10143`); app complete. See [SPEC.md](./SPEC.md).
 
 | Contract | Address |
 |---|---|
