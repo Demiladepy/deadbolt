@@ -96,6 +96,19 @@ export function VaultDashboard({ vault, user }: { vault: Address; user: Address 
   const [trust, setTrust] = useState(false);
   const validSpender = /^0x[a-fA-F0-9]{40}$/.test(spender);
 
+  const [panicProof, setPanicProof] = useState<{ n: number; ms: number } | null>(null);
+  async function doPanic() {
+    const n = liveApprovals.length;
+    const res = await tx.run({
+      address: vault,
+      abi: vaultAbi,
+      functionName: "panic",
+      args: [],
+      label: "PANIC — revoke everything",
+    });
+    if (res.ok) setPanicProof({ n, ms: res.ms });
+  }
+
   async function requestApproval() {
     if (locked) return;
     if (trust) {
@@ -147,15 +160,7 @@ export function VaultDashboard({ vault, user }: { vault: Address; user: Address 
         busy={tx.busy}
         onMint={mint}
         onDeposit={deposit}
-        onPanic={() =>
-          tx.run({
-            address: vault,
-            abi: vaultAbi,
-            functionName: "panic",
-            args: [],
-            label: "PANIC — revoke everything",
-          })
-        }
+        onPanic={doPanic}
         onUnlock={() =>
           tx.run({
             address: vault,
@@ -167,6 +172,24 @@ export function VaultDashboard({ vault, user }: { vault: Address; user: Address 
         }
         onChange={() => refetch()}
       />
+
+      {panicProof && (
+        <div className="proof-bar safe monad-proof">
+          {panicProof.n > 0 ? (
+            <>
+              Revoked <b>{panicProof.n}</b> live approval{panicProof.n === 1 ? "" : "s"} in{" "}
+              <b>one transaction</b> · confirmed in{" "}
+              <b>{(panicProof.ms / 1000).toFixed(2)}s</b> on Monad. On a normal wallet that
+              is {panicProof.n} separate signatures.
+            </>
+          ) : (
+            <>
+              Vault locked in <b>one transaction</b> · confirmed in{" "}
+              <b>{(panicProof.ms / 1000).toFixed(2)}s</b> on Monad.
+            </>
+          )}
+        </div>
+      )}
 
       <div className="stat-row">
         <div className="stat">
@@ -367,7 +390,11 @@ export function VaultDashboard({ vault, user }: { vault: Address; user: Address 
       <div className="panic">
         <div>
           <h3>The deadbolt</h3>
-          <p>One signature revokes every live approval and locks the vault. Sub-second on Monad.</p>
+          <p>
+            One signature revokes every live approval and locks the vault —{" "}
+            {liveApprovals.length > 0 ? `${liveApprovals.length} ` : ""}
+            open door{liveApprovals.length === 1 ? "" : "s"} in a single Monad transaction.
+          </p>
         </div>
         {locked ? (
           <button
@@ -383,15 +410,7 @@ export function VaultDashboard({ vault, user }: { vault: Address; user: Address 
           <button
             className="btn btn-danger"
             disabled={tx.busy}
-            onClick={() =>
-              tx.run({
-                address: vault,
-                abi: vaultAbi,
-                functionName: "panic",
-                args: [],
-                label: "PANIC — revoke everything",
-              })
-            }
+            onClick={doPanic}
             style={{ fontSize: 15, padding: "13px 26px" }}
           >
             Panic — slam every door
@@ -399,7 +418,7 @@ export function VaultDashboard({ vault, user }: { vault: Address; user: Address 
         )}
       </div>
 
-      <TxToast status={tx.status} hash={tx.hash} label={tx.label} error={tx.error} />
+      <TxToast status={tx.status} hash={tx.hash} label={tx.label} error={tx.error} ms={tx.ms} />
     </div>
   );
 }

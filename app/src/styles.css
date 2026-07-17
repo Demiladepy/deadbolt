@@ -466,6 +466,17 @@ h1.hero-title .amp {
   background: oklch(78% 0.14 75 / 0.08);
   color: var(--warn);
 }
+/* standalone, emphasized proof of the one-tx / Monad-speed moment */
+.proof-bar.monad-proof {
+  border: 1px solid oklch(72% 0.16 155 / 0.35);
+  border-radius: var(--r-lg);
+  padding: 15px 20px;
+  line-height: 1.5;
+}
+.proof-bar.monad-proof b {
+  color: var(--text);
+  font-weight: 650;
+}
 
 /* stats */
 .stat-row {
