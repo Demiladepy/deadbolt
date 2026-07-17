@@ -25,7 +25,7 @@ Connect a wallet on Monad testnet (chain `10143`), mint the demo token, deposit 
 
 ## Deploy
 
-The app auto-deploys to GitHub Pages via [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) on every push to `main`. Enable it once under **Settings → Pages → Source: GitHub Actions**; it then serves at `https://demiladepy.github.io/deadbolt/`. Contracts deploy + verify with Foundry — see [contracts/README.md](contracts/README.md).
+The app deploys to **Vercel**. Import the repo at [vercel.com/new](https://vercel.com/new), set **Root Directory** to `app` (Vite is auto-detected via [app/vercel.json](app/vercel.json)), and deploy. Every push to `main` redeploys automatically. Contracts deploy + verify with Foundry — see [contracts/README.md](contracts/README.md).
 
 ## Status
 
