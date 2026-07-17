@@ -7,6 +7,7 @@ import { useTx } from "../hooks/useTx";
 import { TxToast } from "./TxToast";
 import { DemoPath } from "./DemoPath";
 import { fmtToken, shorten, untilEta } from "../lib/format";
+import { labelAddress } from "../lib/labels";
 
 type PendingApproval = {
   token: Address;
@@ -276,7 +277,7 @@ export function VaultDashboard({ vault, user }: { vault: Address; user: Address 
               return (
                 <div className="item" key={p.id}>
                   <div>
-                    <div className="who">{shorten(p.spender, 6)}</div>
+                    <div className="who">{labelAddress(p.spender, 6)}</div>
                     <div className="meta">
                       {fmtToken(p.amount, decimals)} {symbol} ·{" "}
                       {ready ? "timelock elapsed" : `unlocks in ${untilEta(eta, now)}`}
@@ -336,8 +337,8 @@ export function VaultDashboard({ vault, user }: { vault: Address; user: Address 
             {liveApprovals.map((a, i) => (
               <div className="item" key={i}>
                 <div>
-                  <div className="who">{shorten(a.spender, 6)}</div>
-                  <div className="meta">on token {shorten(a.token, 6)}</div>
+                  <div className="who">{labelAddress(a.spender, 6)}</div>
+                  <div className="meta">on {labelAddress(a.token, 6)}</div>
                 </div>
                 <div className="item-actions">
                   <span className="badge on">approved</span>

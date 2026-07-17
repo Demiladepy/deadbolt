@@ -8,7 +8,8 @@ import {
   DRAINER_ADDRESS,
   DEMO_TOKEN_ADDRESS,
 } from "../config/contracts";
-import { fmtToken, shorten } from "../lib/format";
+import { fmtToken } from "../lib/format";
+import { labelAddress } from "../lib/labels";
 import { explorerAddress } from "../config/chain";
 
 type Verdict = null | "blocked" | "drained";
@@ -53,6 +54,7 @@ export function DemoPath({
   const [stepBusy, setStepBusy] = useState(false);
   const [verdict, setVerdict] = useState<Verdict>(null);
   const [note, setNote] = useState("");
+  const [balAtDrain, setBalAtDrain] = useState<bigint | null>(null);
 
   const { data: drainerAllowance, refetch: refetchAllow } = useReadContract({
     address: DEMO_TOKEN_ADDRESS,
@@ -90,6 +92,7 @@ export function DemoPath({
   async function fire() {
     setStepBusy(true);
     setVerdict(null);
+    setBalAtDrain(vaultBal);
     try {
       const hash = await writeContractAsync({
         address: DRAINER_ADDRESS,
@@ -120,12 +123,12 @@ export function DemoPath({
           </p>
         </div>
         <a
-          className="link mono"
+          className="link"
           href={explorerAddress(DRAINER_ADDRESS)}
           target="_blank"
           rel="noreferrer"
         >
-          Drainer {shorten(DRAINER_ADDRESS, 4)} ↗
+          {labelAddress(DRAINER_ADDRESS)} ↗
         </a>
       </div>
 
@@ -158,8 +161,8 @@ export function DemoPath({
           <div className="n">02 · Phish</div>
           <h4>Sign malicious approval</h4>
           <p>
-            Unlimited approve for the demo drainer. Deadbolt queues it instead of
-            granting it.
+            Unlimited approve for <b>{labelAddress(DRAINER_ADDRESS)}</b>. Deadbolt
+            queues it instead of granting it.
           </p>
           <button className="btn btn-warn" onClick={phish} disabled={working || !funded || locked}>
             {stepBusy ? "Signing…" : "Sign phishing approval"}
@@ -196,8 +199,9 @@ export function DemoPath({
 
       {verdict === "blocked" && (
         <div className="proof-bar safe">
-          Blocked. Vault never approved the drainer — {symbol} never moved. Allowance
-          still {fmtToken(allowance, decimals)}.
+          Blocked. {labelAddress(DRAINER_ADDRESS)} got nothing — vault still holds{" "}
+          {fmtToken(vaultBal, decimals)} {symbol}
+          {balAtDrain !== null ? ` (was ${fmtToken(balAtDrain, decimals)} before drain)` : ""}.
         </div>
       )}
       {verdict === "drained" && (
