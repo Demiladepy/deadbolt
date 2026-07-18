@@ -1,10 +1,23 @@
-import { getDefaultConfig } from "@rainbow-me/rainbowkit";
+import { connectorsForWallets } from "@rainbow-me/rainbowkit";
+import { injectedWallet } from "@rainbow-me/rainbowkit/wallets";
+import { createConfig, http } from "wagmi";
 import { monadTestnet } from "./chain";
 
-export const wagmiConfig = getDefaultConfig({
-  appName: "Deadbolt",
-  // Public WalletConnect demo project id. Swap for your own for production.
-  projectId: "3fbb6bba6f1de962d911bb5b5c3dba68",
+// Injected-only: connects to whatever extension wallet is installed
+// (MetaMask, Rabby, OKX…) with no WalletConnect relay — so there's no
+// projectId/allowlist dependency and connect works on any origin.
+// To add mobile WalletConnect later, swap in getDefaultConfig with a real
+// projectId from https://cloud.reown.com and that domain allowlisted.
+const connectors = connectorsForWallets(
+  [{ groupName: "Wallets", wallets: [injectedWallet] }],
+  { appName: "Deadbolt", projectId: "deadbolt" }
+);
+
+export const wagmiConfig = createConfig({
+  connectors,
   chains: [monadTestnet],
+  transports: {
+    [monadTestnet.id]: http("https://testnet-rpc.monad.xyz"),
+  },
   ssr: false,
 });

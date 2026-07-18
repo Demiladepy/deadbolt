@@ -1,6 +1,17 @@
 import { useCallback, useState } from "react";
-import { useWriteContract, usePublicClient } from "wagmi";
+import { useWriteContract, usePublicClient, useChainId, useSwitchChain } from "wagmi";
 import type { Abi, Address } from "viem";
+import { monadTestnet } from "../config/chain";
+
+function cleanError(e: unknown): string {
+  const err = e as { shortMessage?: string; message?: string };
+  const raw = err?.shortMessage || err?.message || "Transaction failed";
+  if (/insufficient funds/i.test(raw)) return "Insufficient MON for gas — get testnet MON from the faucet.";
+  if (/user rejected|denied|rejected the request/i.test(raw)) return "Request rejected in wallet.";
+  if (/chain|network/i.test(raw) && /mismatch|does not match|switch/i.test(raw))
+    return "Wrong network — switch your wallet to Monad testnet.";
+  return raw.split("\n")[0];
+}
 
 type TxState = {
   status: "idle" | "pending" | "mined" | "error";
@@ -21,6 +32,8 @@ export type TxResult = { ok: boolean; ms: number };
 export function useTx(onDone?: () => void) {
   const { writeContractAsync } = useWriteContract();
   const publicClient = usePublicClient();
+  const chainId = useChainId();
+  const { switchChainAsync } = useSwitchChain();
   const [state, setState] = useState<TxState>({ status: "idle" });
 
   const run = useCallback(
@@ -33,7 +46,13 @@ export function useTx(onDone?: () => void) {
     }): Promise<TxResult> => {
       setState({ status: "pending", label: args.label });
       try {
+        // Make sure the wallet is on Monad testnet before sending, otherwise
+        // the write reverts with a chain-mismatch the user can't act on.
+        if (chainId !== monadTestnet.id) {
+          await switchChainAsync({ chainId: monadTestnet.id });
+        }
         const hash = await writeContractAsync({
+          chainId: monadTestnet.id,
           address: args.address,
           abi: args.abi as Abi,
           functionName: args.functionName,
@@ -49,13 +68,12 @@ export function useTx(onDone?: () => void) {
         setTimeout(() => setState({ status: "idle" }), 4500);
         return { ok: true, ms };
       } catch (e: unknown) {
-        const msg = e instanceof Error ? e.message : "Transaction failed";
-        setState({ status: "error", error: msg.split("\n")[0], label: args.label });
+        setState({ status: "error", error: cleanError(e), label: args.label });
         setTimeout(() => setState({ status: "idle" }), 6000);
         return { ok: false, ms: 0 };
       }
     },
-    [writeContractAsync, publicClient, onDone]
+    [writeContractAsync, publicClient, onDone, chainId, switchChainAsync]
   );
 
   return { ...state, run, busy: state.status === "pending" };

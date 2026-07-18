@@ -117,6 +117,7 @@ export function ApprovalScanner({ user }: { user: Address }) {
     setBusyKey(keyOf(a));
     try {
       const hash = await writeContractAsync({
+        chainId: monadTestnet.id,
         address: a.token,
         abi: ERC20,
         functionName: "approve",
@@ -159,6 +160,7 @@ export function ApprovalScanner({ user }: { user: Address }) {
         // honest fallback: sequential approvals, same as Revoke.cash
         for (const a of [...rows]) {
           const hash = await writeContractAsync({
+            chainId: monadTestnet.id,
             address: a.token,
             abi: ERC20,
             functionName: "approve",
